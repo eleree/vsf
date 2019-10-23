@@ -16,6 +16,8 @@
  ****************************************************************************/
 #include "vsf.h"
 #include <stdio.h>
+#include "stm32f4xx_hal.h"
+
 void uart_config(void)
 {
 #if defined(IOTKIT_SECURE_UART0)
@@ -71,6 +73,9 @@ ROOT
 int vsf_stdout_putchar(char txchar)
 {
     if (txchar == 10) vsf_stdout_putchar((char) 13);
+		extern UART_HandleTypeDef huart1;
+
+		HAL_UART_Transmit(&huart1, (uint8_t *) &txchar,1, 1000);
 
 #if defined(IOTKIT_SECURE_UART0)
     while(IOTKIT_SECURE_UART0->STATE & IOTKIT_UART_STATE_TXBF_Msk);

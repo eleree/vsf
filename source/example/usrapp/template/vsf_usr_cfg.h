@@ -34,7 +34,7 @@
 
 #define VSF_SYSTIMER_RESOLUTION         1000000
 
-#define VSF_HEAP_SIZE                   4096
+#define VSF_HEAP_SIZE                   1024
 
 //-------- <<< Use Configuration Wizard in Context Menu >>> --------------------
 
@@ -56,7 +56,7 @@
 
 //          <o>The number of preemptive priorities <1-4>
 //          <i>Simon, please add description here...
-//#define VSF_OS_CFG_PRIORITY_NUM                 9
+#define VSF_OS_CFG_PRIORITY_NUM                 1
 //      </h>
 
 //      <o>The default eda stack frame pool size <1-65535>

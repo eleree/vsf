@@ -191,7 +191,19 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+__attribute__((constructor(1)))
+void vsf_core_init(void)
+{
+	SystemClock_Config();
+}
 
+void vsf_uart_init(void)
+{
+	MX_USART1_UART_Init();
+	uint8_t test[] = "this is test data.";
+	
+	HAL_UART_Transmit(&huart1, test, sizeof(test), 1000);
+}
 /* USER CODE END 4 */
 
 /**

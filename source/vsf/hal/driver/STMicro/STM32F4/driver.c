@@ -18,7 +18,7 @@
 /*============================ INCLUDES ======================================*/
 #include "hal/vsf_hal_cfg.h"
 #include "./device.h"
-
+#include "vsf.h"
 /*============================ MACROS ========================================*/
 /*============================ MACROFIED FUNCTIONS ===========================*/
 /*============================ TYPES =========================================*/
@@ -34,7 +34,9 @@
  */
 bool vsf_driver_init(void)
 {
-
+		void vsf_uart_init(void);
+		vsf_uart_init();
+		//vsf_trace(VSF_TRACE_DEBUG, "vsf driver init\r\n");
     return true;
 }
 
