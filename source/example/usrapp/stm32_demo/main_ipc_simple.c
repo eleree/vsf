@@ -34,6 +34,7 @@ def_vsf_thread(user_thread_a_t, 1024,
     def_params(
         vsf_sem_t *psem;
 				uint32_t cnt;
+				vsf_thread_t * thread_obj;
     ));
 
 declare_vsf_thread(user_thread_b_t)
@@ -54,10 +55,32 @@ def_vsf_thread(user_thread_b_t, 1024,
 /*============================ LOCAL VARIABLES ===============================*/
 static NO_INIT vsf_sem_t user_sem;
 static bool __flag = false;
+
+enum{
+VSF_EVT_START = VSF_EVT_USER + 1,
+}vsf_user_evt_t;
+
 /*============================ PROTOTYPES ====================================*/
 /*============================ IMPLEMENTATION ================================*/
 
-
+void vsf_kernel_post_evt_simple_demo(void)
+{
+	vsf_thread_t * target_thread;
+	{
+		static NO_INIT user_thread_b_t __user_task_b;
+		__user_task_b.param.cnt = 0;
+		target_thread = (vsf_thread_t*) & __user_task_b;
+		init_vsf_thread(user_thread_b_t, &__user_task_b, vsf_prio_0);
+	}
+	
+	{
+		static NO_INIT user_thread_a_t __user_task_a;
+		__user_task_a.param.cnt = 0;
+		__user_task_a.thread_obj = target_thread;
+		init_vsf_thread(user_thread_a_t, &__user_task_a, vsf_prio_0);
+	}
+	
+}
 void vsf_kernel_thread_simple_demo(void)
 {    
     //! initialise semaphore
@@ -81,9 +104,9 @@ void vsf_kernel_thread_simple_demo(void)
 implement_vsf_thread(user_thread_a_t) 
 {
     while (1) {
-			__flag = true;
+			vsf_thread_sendevt(this.thread_obj, VSF_EVT_START);
 			this.cnt++;
-			printf("task_a set __flag:No.%d\r\n",this.cnt);
+			printf("task_a post evt:No.%d\r\n",this.cnt);
 			vsf_delay_ms(1000);			
     }
 }
@@ -91,13 +114,10 @@ implement_vsf_thread(user_thread_a_t)
 implement_vsf_thread(user_thread_b_t) 
 {
     while (1) {
-			if(__flag != false)
-			{
-				this.cnt ++;
-				printf("task_b detected  that __flag is set: NO.%d\r\n",this.cnt);
-				__flag =false;
-			}
-			vsf_delay_ms(10);
+			vsf_thread_wfe(VSF_EVT_START);
+			this.cnt++;
+			printf("task_b receive a evt: NO.%d\r\n",this.cnt);
+	
     }
 }
 
@@ -122,14 +142,16 @@ int main(void)
 
     vsf_stdio_init();
     
-    vsf_kernel_thread_simple_demo();
-    timer.on_timer = vsf_timer_test;
+	vsf_kernel_post_evt_simple_demo();
+	
+    //vsf_kernel_thread_simple_demo();
+    //timer.on_timer = vsf_timer_test;
 		//vsf_callback_timer_add_ms(&timer,2000);
 	
 #if     VSF_OS_CFG_MAIN_MODE == VSF_OS_CFG_MAIN_MODE_THREAD                     \
     &&  VSF_KERNEL_CFG_SUPPORT_THREAD == ENABLED
     while(1) {
-        printf("hello world! \r\n");
+        //printf("hello world! \r\n");
 			  vsf_delay_ms(1000);
     }
 #else
