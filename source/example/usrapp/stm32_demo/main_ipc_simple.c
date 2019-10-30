@@ -33,6 +33,7 @@ def_vsf_thread(user_thread_a_t, 1024,
     
     def_params(
         vsf_sem_t *psem;
+				uint32_t cnt;
     ));
 
 declare_vsf_thread(user_thread_b_t)
@@ -46,11 +47,13 @@ def_vsf_thread(user_thread_b_t, 1024,
     
     def_params(
         vsf_sem_t *psem;
+				uint32_t cnt;
     ));
 
 /*============================ GLOBAL VARIABLES ==============================*/
 /*============================ LOCAL VARIABLES ===============================*/
 static NO_INIT vsf_sem_t user_sem;
+static bool __flag = false;
 /*============================ PROTOTYPES ====================================*/
 /*============================ IMPLEMENTATION ================================*/
 
@@ -77,20 +80,24 @@ void vsf_kernel_thread_simple_demo(void)
 
 implement_vsf_thread(user_thread_a_t) 
 {
-    uint32_t cnt = 0;
     while (1) {
-        vsf_delay_ms(1000);
-        printf("post semaphore...     [%08x]\r\n", cnt++);
-        vsf_sem_post(this.psem);            //!< post a semaphore
+			__flag = true;
+			this.cnt++;
+			printf("task_a set __flag:No.%d\r\n",this.cnt);
+			vsf_delay_ms(1000);			
     }
 }
 
 implement_vsf_thread(user_thread_b_t) 
 {
-    uint32_t cnt = 0;
     while (1) {
-        vsf_sem_pend(this.psem);            //! wait for semaphore forever
-        printf("receive semaphore...  [%08x]\r\n", cnt++);
+			if(__flag != false)
+			{
+				this.cnt ++;
+				printf("task_b detected  that __flag is set: NO.%d\r\n",this.cnt);
+				__flag =false;
+			}
+			vsf_delay_ms(10);
     }
 }
 
@@ -117,14 +124,13 @@ int main(void)
     
     vsf_kernel_thread_simple_demo();
     timer.on_timer = vsf_timer_test;
-		vsf_callback_timer_add_ms(&timer,2000);
+		//vsf_callback_timer_add_ms(&timer,2000);
 	
 #if     VSF_OS_CFG_MAIN_MODE == VSF_OS_CFG_MAIN_MODE_THREAD                     \
     &&  VSF_KERNEL_CFG_SUPPORT_THREAD == ENABLED
     while(1) {
         printf("hello world! \r\n");
 			  vsf_delay_ms(1000);
-        vsf_yield();
     }
 #else
     return 0;
