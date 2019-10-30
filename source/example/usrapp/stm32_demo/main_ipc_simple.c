@@ -35,6 +35,7 @@ def_vsf_thread(user_thread_a_t, 1024,
         vsf_sem_t *psem;
 				uint32_t cnt;
 				vsf_thread_t * thread_obj;
+				vsf_trig_t * set_trig;
     ));
 
 declare_vsf_thread(user_thread_b_t)
@@ -49,13 +50,16 @@ def_vsf_thread(user_thread_b_t, 1024,
     def_params(
         vsf_sem_t *psem;
 				uint32_t cnt;
+				vsf_trig_t * wait_trig;
     ));
 
 /*============================ GLOBAL VARIABLES ==============================*/
 /*============================ LOCAL VARIABLES ===============================*/
+#define AUTO true
+	
 static NO_INIT vsf_sem_t user_sem;
 static bool __flag = false;
-
+static NO_INIT vsf_trig_t __trig_start;
 enum{
 VSF_EVT_START = VSF_EVT_USER + 1,
 }vsf_user_evt_t;
@@ -101,12 +105,28 @@ void vsf_kernel_thread_simple_demo(void)
     }
 }
 
+void vsf_kernel_trig_simple_demo(void)
+{
+	vsf_trig_init(&__trig_start, RESET, AUTO);
+	{
+		static NO_INIT user_thread_a_t __user_task_a;
+		__user_task_a.param.set_trig = & __trig_start;
+		init_vsf_thread(user_thread_a_t, &__user_task_a, vsf_prio_0);
+	}
+	{
+		static NO_INIT user_thread_b_t __user_task_b;
+		__user_task_b.param.wait_trig = & __trig_start;
+		init_vsf_thread(user_thread_b_t, &__user_task_b, vsf_prio_0);
+	}
+}
+
 implement_vsf_thread(user_thread_a_t) 
 {
     while (1) {
-			vsf_thread_sendevt(this.thread_obj, VSF_EVT_START);
+			//vsf_thread_sendevt(this.thread_obj, VSF_EVT_START);
+			vsf_trig_set(this.set_trig);
 			this.cnt++;
-			printf("task_a post evt:No.%d\r\n",this.cnt);
+			printf("task_a set a trig:No.%d\r\n",this.cnt);
 			vsf_delay_ms(1000);			
     }
 }
@@ -114,9 +134,10 @@ implement_vsf_thread(user_thread_a_t)
 implement_vsf_thread(user_thread_b_t) 
 {
     while (1) {
-			vsf_thread_wfe(VSF_EVT_START);
+			//vsf_thread_wfe(VSF_EVT_START);
+			vsf_trig_wait(this.wait_trig);
 			this.cnt++;
-			printf("task_b receive a evt: NO.%d\r\n",this.cnt);
+			printf("task_b detected that trig is set: NO.%d\r\n",this.cnt);
 	
     }
 }
@@ -142,8 +163,8 @@ int main(void)
 
     vsf_stdio_init();
     
-	vsf_kernel_post_evt_simple_demo();
-	
+		//vsf_kernel_post_evt_simple_demo();
+		vsf_kernel_trig_simple_demo();
     //vsf_kernel_thread_simple_demo();
     //timer.on_timer = vsf_timer_test;
 		//vsf_callback_timer_add_ms(&timer,2000);
