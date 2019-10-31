@@ -19,6 +19,13 @@
 #include "vsf.h"
 #include <stdio.h>
 
+declare_grouped_evts(cpl_grouped_evts_t) 
+	def_grouped_evts(cpl_grouped_evts_t)
+	def_adapter (cpl_grouped_evts_t, cpl_a_evt),
+	def_adapter (cpl_grouped_evts_t, cpl_b_evt),
+	def_adapter (cpl_grouped_evts_t, cpl_c_evt),
+end_def_grouped_evts(cpl_grouped_evts_t)
+
 /*============================ MACROS ========================================*/
 /*============================ MACROFIED FUNCTIONS ===========================*/
 /*============================ TYPES =========================================*/
@@ -36,6 +43,9 @@ def_vsf_thread(user_thread_a_t, 1024,
 				uint32_t cnt;
 				vsf_thread_t * thread_obj;
 				vsf_trig_t * set_trig;
+				vsf_trig_t * wait_trig;
+				cpl_grouped_evts_t * set_group_evts;
+				uint_fast32_t set_mask;
     ));
 
 declare_vsf_thread(user_thread_b_t)
@@ -51,11 +61,31 @@ def_vsf_thread(user_thread_b_t, 1024,
         vsf_sem_t *psem;
 				uint32_t cnt;
 				vsf_trig_t * wait_trig;
+				cpl_grouped_evts_t * set_group_evts;
+				uint_fast32_t set_mask;
     ));
 
+declare_vsf_thread(user_thread_c_t)
+
+def_vsf_thread(user_thread_c_t, 1024,
+
+    features_used(
+        mem_sharable( )
+        mem_nonsharable( )
+    )
+    
+    def_params(
+        vsf_sem_t *psem;
+				uint32_t cnt;
+				vsf_trig_t * wait_trig;
+				cpl_grouped_evts_t * set_group_evts;
+				uint_fast32_t set_mask;
+    ));
+		
 /*============================ GLOBAL VARIABLES ==============================*/
 /*============================ LOCAL VARIABLES ===============================*/
 #define AUTO true
+#define MANUAL false
 	
 static NO_INIT vsf_sem_t user_sem;
 static bool __flag = false;
@@ -64,6 +94,17 @@ enum{
 VSF_EVT_START = VSF_EVT_USER + 1,
 }vsf_user_evt_t;
 
+
+
+static NO_INIT cpl_grouped_evts_t __cpl_grouped_evts;
+
+static NO_INIT vsf_trig_t __trig_start_a; 
+static NO_INIT vsf_trig_t __trig_start_b;
+static NO_INIT vsf_trig_t __trig_start_c;
+
+static NO_INIT vsf_trig_t __trig_cpl_a;
+static NO_INIT vsf_trig_t __trig_cpl_b;
+static NO_INIT vsf_trig_t __trig_cpl_c;
 /*============================ PROTOTYPES ====================================*/
 /*============================ IMPLEMENTATION ================================*/
 
@@ -105,6 +146,49 @@ void vsf_kernel_thread_simple_demo(void)
     }
 }
 
+implement_grouped_evts(cpl_grouped_evts_t,
+	add_sync_adapter( &__trig_cpl_a, cpl_a_evt_msk), 
+	add_sync_adapter( &__trig_cpl_b, cpl_b_evt_msk),
+	add_sync_adapter( &__trig_cpl_c, cpl_c_evt_msk),
+)
+
+void vsf_kernel_grouped_evts_simple_demo(void)
+{
+	vsf_trig_init(&__trig_start_a, RESET, AUTO); 
+	vsf_trig_init(&__trig_start_b, RESET, AUTO);
+	vsf_trig_init(&__trig_start_c, RESET, AUTO);
+	vsf_trig_init(&__trig_cpl_a, RESET, MANUAL); 
+	vsf_trig_init(&__trig_cpl_b, RESET, MANUAL);
+	vsf_trig_init(&__trig_cpl_c, RESET, MANUAL);
+
+	init_grouped_evts(cpl_grouped_evts_t, &__cpl_grouped_evts, MANUAL);
+
+	/*start the user task a*/
+	{
+	static NO_INIT user_thread_a_t __user_task_a;
+	__user_task_a.param.wait_trig = &__trig_start_a;
+	__user_task_a.param.set_group_evts = &__cpl_grouped_evts;
+	__user_task_a.param.set_mask = cpl_a_evt_msk;
+	init_vsf_thread(user_thread_a_t, &__user_task_a, vsf_prio_0); 
+	} 
+	/*start the user task b*/
+	{
+	static NO_INIT user_thread_b_t __user_task_b;
+	__user_task_b.param.wait_trig = &__trig_start_b;
+	__user_task_b.param.set_group_evts = &__cpl_grouped_evts; 
+	__user_task_b.param.set_mask = cpl_b_evt_msk;
+	init_vsf_thread(user_thread_b_t, &__user_task_b, vsf_prio_0);
+	} 
+	/*start the user task c*/
+	{
+	static NO_INIT user_thread_c_t __user_task_c;
+	__user_task_c.param.wait_trig = &__trig_start_c;
+	__user_task_c.param.set_group_evts = &__cpl_grouped_evts;
+	__user_task_c.param.set_mask = cpl_c_evt_msk;
+	init_vsf_thread(user_thread_c_t, &__user_task_c, vsf_prio_0);
+	}
+}
+
 void vsf_kernel_trig_simple_demo(void)
 {
 	vsf_trig_init(&__trig_start, RESET, AUTO);
@@ -122,26 +206,36 @@ void vsf_kernel_trig_simple_demo(void)
 
 implement_vsf_thread(user_thread_a_t) 
 {
-    while (1) {
-			//vsf_thread_sendevt(this.thread_obj, VSF_EVT_START);
-			vsf_trig_set(this.set_trig);
-			this.cnt++;
-			printf("task_a set a trig:No.%d\r\n",this.cnt);
-			vsf_delay_ms(1000);			
-    }
+	while(1) {
+		vsf_trig_wait(this.wait_trig);
+		printf("task_a start\r\n"); 
+		vsf_delay_ms(rand()%1000); 
+		set_grouped_evts(this.set_group_evts, this.set_mask); 
+		printf("task_a stopped\r\n"); 
+	}
 }
 
 implement_vsf_thread(user_thread_b_t) 
 {
-    while (1) {
-			//vsf_thread_wfe(VSF_EVT_START);
-			vsf_trig_wait(this.wait_trig);
-			this.cnt++;
-			printf("task_b detected that trig is set: NO.%d\r\n",this.cnt);
-	
-    }
+	while(1) {
+		vsf_trig_wait(this.wait_trig);
+		printf("task_b start\r\n");
+		vsf_delay_ms(200);
+		set_grouped_evts(this.set_group_evts, this.set_mask);
+		printf("task_b stopped\r\n");
+	}
 }
 
+implement_vsf_thread(user_thread_c_t)
+{
+	while(1) {
+		vsf_trig_wait(this.wait_trig);
+		printf("task_c start\r\n");
+		vsf_delay_ms(100);
+		set_grouped_evts(this.set_group_evts, this.set_mask);
+		printf("task_c stopped\r\n");
+	}
+}
 
 void vsf_timer_test(vsf_callback_timer_t *timer)
 {
@@ -156,23 +250,34 @@ int main(void)
 {
     static_task_instance(
         features_used(
-            mem_sharable( )
+            mem_sharable( using_grouped_evt; )
             mem_nonsharable( )
         )
     )
 
     vsf_stdio_init();
-    
+    srand(2);
 		//vsf_kernel_post_evt_simple_demo();
-		vsf_kernel_trig_simple_demo();
+		//vsf_kernel_trig_simple_demo();
     //vsf_kernel_thread_simple_demo();
     //timer.on_timer = vsf_timer_test;
 		//vsf_callback_timer_add_ms(&timer,2000);
+		vsf_kernel_grouped_evts_simple_demo();
+	
 	
 #if     VSF_OS_CFG_MAIN_MODE == VSF_OS_CFG_MAIN_MODE_THREAD                     \
     &&  VSF_KERNEL_CFG_SUPPORT_THREAD == ENABLED
     while(1) {
+				vsf_trig_set(&__trig_start_a);
+				vsf_trig_set(&__trig_start_b);
+				vsf_trig_set(&__trig_start_c);
+				printf("-----All tasks have been triggered-----\r\n");
         //printf("hello world! \r\n");
+				wait_for_all(&__cpl_grouped_evts, all_evts_msk_of_cpl_grouped_evts_t) {
+					reset_grouped_evts(&__cpl_grouped_evts,
+					all_evts_msk_of_cpl_grouped_evts_t);					
+					printf("----All tasks completed and sync-ed----\r\n\r\n");
+				}
 			  vsf_delay_ms(1000);
     }
 #else
