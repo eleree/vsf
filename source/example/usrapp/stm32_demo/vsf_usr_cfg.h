@@ -146,8 +146,9 @@
 //! @}
 
 //#define __VSF_KERNEL_CFG_EDA_FRAME_POOL         DISABLED
-
-#define VSF_USE_SERVICE_STREAM              DISABLED
+#define VSF_USE_PBUF												ENABLED
+#define VSF_USE_SERVICE_STREAM              ENABLED
+#define VSF_USE_SERVICE_VSFSTREAM           DISABLED
 
 #define VSF_KERNEL_CFG_CALLBACK_TIMER       ENABLED
 

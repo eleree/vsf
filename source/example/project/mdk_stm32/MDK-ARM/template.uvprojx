@@ -339,7 +339,7 @@
               <MiscControls>-fms-extensions -Wno-empty-body -Wno-microsoft-anon-tag -Wno-nonportable-include-path -Wno-tautological-constant-out-of-range-compare</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F437xx,USE_HAL_DRIVER,STM32F437xx,_MSC_VER,__STMicro__</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\..\..\..\vsf;..\..\..\usrapp\stm32_demo;..\..\..\..\vsf\utilities\compiler\arm\CMSIS\Core\Include</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F4xx_HAL_Driver/Inc;../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F4xx/Include;../Drivers/CMSIS/Include;..\..\..\..\vsf;..\..\..\usrapp\stm32_demo;..\..\..\..\vsf\utilities\compiler\arm\CMSIS\Core\Include;..\..\..\..\vsf\service\stream\pbuf;..\..\..\..\vsf\service\stream\pbuf_queue;..\..\..\..\vsf\service\stream\</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -397,6 +397,57 @@
               <FileName>main_thread_simple.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\usrapp\stm32_demo\main_thread_simple.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>0</AlwaysBuild>
+                  <GenerateAssemblyFile>0</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
             </File>
             <File>
               <FileName>class_demo.c</FileName>
@@ -407,6 +458,11 @@
               <FileName>class_simple_demo.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\usrapp\stm32_demo\ooc_demo\class_simple_demo.c</FilePath>
+            </File>
+            <File>
+              <FileName>main_ipc_simple.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\usrapp\stm32_demo\main_ipc_simple.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -892,6 +948,131 @@
               <FileName>cortex_m_generic.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\vsf\hal\arch\arm\cortex-m\cortex_m_generic.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf/service/trace</GroupName>
+          <Files>
+            <File>
+              <FileName>vsf_trace.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\trace\vsf_trace.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_trace.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\vsf\service\trace\vsf_trace.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf/service/dynarr</GroupName>
+          <Files>
+            <File>
+              <FileName>vsf_dynarr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\dynarr\vsf_dynarr.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_dynarr.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\vsf\service\dynarr\vsf_dynarr.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf/service/dynstack</GroupName>
+          <Files>
+            <File>
+              <FileName>vsf_dynstack.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\dynstack\vsf_dynstack.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_dynstack.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\vsf\service\dynstack\vsf_dynstack.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf/service/vsfstream</GroupName>
+          <Files>
+            <File>
+              <FileName>vsfstream.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\vsfstream\vsfstream.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsfstream.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\vsf\service\vsfstream\vsfstream.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf/service/vsfstream/fifo_stream</GroupName>
+          <Files>
+            <File>
+              <FileName>vsf_fifo_stream.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\vsfstream\fifo_stream\vsf_fifo_stream.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_fifo_stream.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\vsf\service\vsfstream\fifo_stream\vsf_fifo_stream.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf/service/stream</GroupName>
+          <Files>
+            <File>
+              <FileName>vsf_stream.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\stream\vsf_stream.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_stream_base.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\stream\vsf_stream_base.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_stream_reader.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\stream\vsf_stream_reader.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_stream_writer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\stream\vsf_stream_writer.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf/service/stream/pbuf</GroupName>
+          <Files>
+            <File>
+              <FileName>vsf_pbuf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\stream\pbuf\vsf_pbuf.c</FilePath>
+            </File>
+            <File>
+              <FileName>vsf_pbuf_pool.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\stream\pbuf\vsf_pbuf_pool.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>vsf/service/stream/pbuf_queue</GroupName>
+          <Files>
+            <File>
+              <FileName>vsf_pbuf_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\vsf\service\stream\pbuf_queue\vsf_pbuf_queue.c</FilePath>
             </File>
           </Files>
         </Group>
